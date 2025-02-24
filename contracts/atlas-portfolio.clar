@@ -34,3 +34,44 @@
 (define-constant ERR-LENGTH-MISMATCH (err u108))
 (define-constant ERR-USER-STORAGE-FAILED (err u109))
 (define-constant ERR-INVALID-TOKEN-ID (err u110))
+
+;; Protocol Configuration
+(define-constant MAX-TOKENS-PER-PORTFOLIO u10)
+(define-constant BASIS-POINTS u10000)
+
+;; Protocol State
+(define-data-var protocol-owner principal tx-sender)
+(define-data-var portfolio-counter uint u0)
+(define-data-var protocol-fee uint u25) ;; 0.25% in basis points
+
+;; Data Maps
+(define-map Portfolios
+    uint  ;; portfolio-id
+    {
+        owner: principal,
+        created-at: uint,
+        last-rebalanced: uint,
+        total-value: uint,
+        active: bool,
+        token-count: uint
+    }
+)
+
+(define-map PortfolioAssets
+    {portfolio-id: uint, token-id: uint}
+    {
+        target-percentage: uint,
+        current-amount: uint,
+        token-address: principal
+    }
+)
+
+(define-map UserPortfolios
+    principal
+    (list 20 uint)
+)
+
+;; Read-Only Functions
+(define-read-only (get-portfolio (portfolio-id uint))
+    (map-get? Portfolios portfolio-id)
+)
